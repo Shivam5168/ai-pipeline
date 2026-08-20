@@ -23,6 +23,7 @@ def inspect_code_and_data():
     Examine this JSON file content before deployment:
     1. Check for exposed secrets, passwords, or API keys .
     2. Validate that the JSON structure is clean and valid.
+    3. Add one tag in json file evrytime when cicd run is : key = AI-Status, Value = Succedd, and make it store this value in s3 with the json data.
 
     File Content:
     {content}
