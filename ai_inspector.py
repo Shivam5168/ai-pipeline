@@ -21,7 +21,7 @@ def inspect_code_and_data():
     prompt = f"""
     You are an automated CI/CD AI Inspector.
     Examine this JSON file content before deployment:
-    1. Check for exposed secrets, passwords, or API keys.
+    1. Check for exposed secrets, passwords, or API keys .
     2. Validate that the JSON structure is clean and valid.
 
     File Content:
