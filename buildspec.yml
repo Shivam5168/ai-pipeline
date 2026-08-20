@@ -1,19 +1,50 @@
-version: 0.2
+name: AI-Validated S3 Deployment
 
-phases:
-  install:
-    runtime-versions:
-      python: 3.11
-    commands:
-      - pip install google-genai
-  pre_build:
-    commands:
-      - echo "Running AI validation checks with Gemini..."
-      - python ai_inspector.py
-  build:
-    commands:
-      - echo "AI checks passed. Syncing files to S3..."
-      - aws s3 sync . s3://$S3_BUCKET/ --exclude ".git/*" --exclude "buildspec.yml" --exclude "ai_inspector.py"
-  post_build:
-    commands:
-      - echo "Deployment to S3 completed successfully."
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  validate-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install google-genai
+
+      - name: Run Gemini AI Validation Agent
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          echo "Running AI validation checks..."
+          python ai_inspector.py
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Sync to Amazon S3
+        run: |
+          echo "AI check passed. Syncing files to S3..."
+          aws s3 sync . s3://${{ secrets.S3_BUCKET }}/ \
+            --exclude ".git/*" \
+            --exclude ".github/*" \
+            --exclude "ai_inspector.py" \
+            --exclude "buildspec.yml"
+
+      - name: Deployment Success Notification
+        run: echo "Files successfully validated and synced to S3."
