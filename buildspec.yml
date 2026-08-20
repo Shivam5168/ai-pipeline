@@ -1,12 +1,5 @@
 version: 0.2
 
-env:
-  variables:
-    S3_BUCKET: "my-target-s3-bucket-name"
-  secrets-manager:
-    # Store your free Gemini API key in AWS Secrets Manager or Parameter Store
-    GEMINI_API_KEY: "my-gemini-api-key"
-
 phases:
   install:
     runtime-versions:
@@ -19,7 +12,7 @@ phases:
       - python ai_inspector.py
   build:
     commands:
-      - echo "AI checks passed. Syncing files to Amazon S3..."
+      - echo "AI checks passed. Syncing files to S3..."
       - aws s3 sync . s3://$S3_BUCKET/ --exclude ".git/*" --exclude "buildspec.yml" --exclude "ai_inspector.py"
   post_build:
     commands:
